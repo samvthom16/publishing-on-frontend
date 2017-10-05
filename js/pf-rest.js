@@ -1,0 +1,361 @@
+// CALLBACK FUNCTION FOR THE WP API TO LOAD
+wp.api.loadPromise.done( function() {
+	
+	// CALLBACK FUNCTION AFTER THE DOM HAS BEEN LOADED
+	jQuery('document').ready(function(){
+		
+		
+		/* BASE VIEW THAT EXTENDS WP VIEW */
+		var BASE_VIEW = wp.Backbone.View.extend({
+				
+			prepare: function() {
+				// BEFORE RENDERING, PASS THE JSON OBJECT OF THE MODEL TO THE TEMPLATE
+				if ( ! _.isUndefined( this.model ) && _.isFunction( this.model.toJSON ) ) {
+					return this.model.toJSON();
+				} else {
+					return {};
+				}
+			},
+		});
+
+
+
+		var pf = {};
+
+		pf.form = BASE_VIEW.extend({
+			hasSaved		: false,
+			template		: wp.template('pf-form'),
+			load_img  		: "i.fa.fa-refresh",
+			submission_form : '#pf-form',
+			message_box 	: '#pf-message',
+			events :{
+				'click #pf-submit-post'			: 'formSubmit',
+				'click #pf-draft-post'			: 'formSubmit',
+				'click #pf-featured-image-link'	: 'selectFeaturedImage',
+				'click #pf-continue-editing'	: 'continueEditing'
+			},
+			initialize: function(){
+				
+				var self = this;
+			
+				// ON CHANGE OF THE MODEL, RENDER THE ENTIRE FORM
+				self.model.on("change", _.debounce(self.render, 300), self);
+				
+				self.render();
+				
+				// CUSTOMIZING THE TINYMCE EDITOR ON INIT
+				self.customize_editor();	
+			},
+			
+			/* ADD MORE BUTTONS TO THE TINY MCE, ESPECIALLY THE IMAGE BUTTON */
+			customize_editor: function(){
+			
+				jQuery( document ).on( 'tinymce-editor-setup', function( event, editor ) {
+					editor.settings.toolbar1 += ',alignleft,aligncenter,alignright,blockquote,image';
+					
+					// CALLBACK FUNCTION FOR THE IMAGE BUTTON - TRIGGER ON CLICK
+					editor.addButton( 'image', {
+						text: '',
+						icon: 'image',
+						onclick: function (event) {
+							
+							var elem = jQuery( event.currentTarget ),
+								editor = elem.data('editor'),
+								options = {
+									frame:    'post',
+									state:    'insert',
+									title:    wp.media.view.l10n.addMedia,
+									multiple: true
+								};
+							
+							event.preventDefault();
+							
+							// OPEN MEDIA LIBRARY
+							wp.media.editor.open( editor, options );
+							
+							
+						}
+					});
+					
+					
+				});
+
+				
+				
+			},
+			
+			
+			render: function(){
+				
+				var self = this,
+					data = self.model.toJSON();		// CONVERT MODEL OBJECT TO JSON OBJECT FOR INSERTING INTO TEMPLATE
+				
+				// IF THE MODEL IS BEING CHANGED AFTER THE SUBMIT OR DRAFT BUTTON IS PRESSED THEN STOP RENDERRING
+				if( self.hasSaved ) { return this;}
+			
+				// RESET THE SAVED FLAG
+				self.hasSaved = false;
+					
+				// IF THE POST TITLE IS EMPTY
+				if( _.isUndefined( self.model.get('title') ) ){
+					data['title'] = { rendered: '' };
+				}
+			
+				// IF THE POST CONTENT IS EMPTY
+				if( _.isUndefined( self.model.get('content') ) ){
+					data['content'] = { rendered: '' };
+				}
+				
+				// RENDER THE POST MODEL INTO THE TEMPLATE FORM
+				self.$el.html( self.template( data ) );
+				
+				// REMOVE TINYMCE INCASE IT ALREADY HAS BEEN INSTANTIATED
+				wp.editor.remove('pf-content');
+				
+				// INITIALIZE TINYMCE
+				wp.editor.initialize('pf-content', { tinymce: true} );
+				
+			},
+			setFeaturedImage: function( url ){
+				
+				// SHOW THE SELECTED FEATURED IMAGE ON THE FORM
+				jQuery('#pf-featured-image-container').attr('style', 'background-image:url(" ' + url + '");');
+				
+			},
+			selectFeaturedImage: function(ev){
+				
+				ev.preventDefault();
+				var self = this;
+				
+				// INIT MEDIA LIBRARY OPTIONS
+				var custom_uploader = wp.media.frames.file_frame = wp.media({
+					title: 'Choose Featured Image',
+					button: {
+						text: 'Choose Image'
+					},
+					multiple: false
+				});
+				
+				// ON SELECTION OF AN IMAGE IN THE MEDIA LIBRARY
+				custom_uploader.on('select', function() {
+					
+					// JSON OBJECT OF THE IMAGE SELECTED
+					attachment = custom_uploader.state().get('selection').first().toJSON();
+					
+					/* UPDATE THE MEDIA ID TO THE FORM FIELD */
+					jQuery('input[name=post_image]').val( attachment.id );
+					
+					self.setFeaturedImage( attachment.url );
+					
+				});
+				
+				// OPEN MEDIA LIBRARY
+				custom_uploader.open();
+				
+				
+			},
+			formSubmit: function(ev){
+			
+				/* save the html to the content textarea */
+				tinyMCE.triggerSave();
+				
+				/* INIT ALL VARIABLES : SELF OBJECT AND GET ALL FORM VALUES */
+				var self 	= this,				
+					title 	= this.$el.find('input[name=post_title]').val(),
+					status 	= jQuery(ev.currentTarget).data('status'),
+					f_image	= this.$el.find('input[name=post_image]').val(),
+					today 	= new Date().toISOString(),
+					content = this.$el.find('textarea[name=post_content]').val();
+				
+				// VALIDATE THE FORM
+				if( !self.validate(title, content) ){ return false; }
+				
+				// CHECK FOR SPAM KEYWORDS AND STOP PUBLISHING IF ANY
+				if( status == 'publish' && !self.checkForSpam(title, content) ){ return false; }
+				
+				// SET FLAG
+				self.hasSaved = true;
+				
+				
+				// ADDING THE FORM VALUES TO THE MODEL
+				self.model.set({ title: title, content: content, status: status, featured_media: f_image, date: today });
+				
+				// SHOW LOADER
+				self.showLoader();
+				
+				
+				// SAVE THE MODEL TO DB
+				self.model.save(null, {
+					'success': function(){
+						
+						// POST MESSAGE AFTER SAVING
+						self.afterPostSave(status);
+					},
+					'error': function(m, r){
+						
+						// SHOW ERROR MESSAGE
+						self.displayMessage( r.responseJSON.message );
+						
+					}
+				});
+			},
+			hideLoader: function(){
+				/* HIDING THE LOADER */
+				this.$el.find(this.load_img).hide();
+			},
+			showLoader: function(){
+				/* SHOWING THE LOADER */
+				this.$el.find(this.load_img).show();
+				
+				/* DISABLE THE FORM BUTTONS WHILE THE LOADER IS ON */
+				this.$el.find('button').attr('disabled', 'disabled');
+				
+			},
+			hideForm: function(){
+				
+				// HIDING THE FORM
+				this.$el.find(this.submission_form).hide();
+				
+				// HIDE THE LOADER ALSO
+				this.hideLoader();
+				
+			},
+			showForm: function(){
+				
+				// HIDE THE MESSAGE BOX IF DISPLAYED
+				this.$el.find( this.message_box ).hide();
+				
+				// DISPLAYING THE FORM
+				this.$el.find( this.submission_form ).show();
+				
+			},
+			continueEditing: function(ev){
+				ev.preventDefault();
+				
+				// RESET THE SAVED FLAG
+				self.hasSaved = false;
+				
+				// SHOW THE FORM
+				this.showForm();
+			},
+			displayMessage: function( msg, message_box_class ){
+				
+				message_box_class = typeof message_box_class !== 'undefined' ? message_box_class : 'warning';
+				
+				// HIDE THE SUBMISSION FORM
+				this.hideForm();
+						
+				
+				var message_box = this.$el.find( this.message_box );
+				
+				// ADDING THE APPROPRIATE CLASS TO THE MESSAGE BOX
+				message_box.attr( 'class', message_box_class );
+				
+				// ADDING THE MSG TO THE DOM HTML
+				message_box.html(msg);
+				
+				// DISPLAYING THE HIDDEN MESSAGE BOX
+				message_box.show();
+				
+				// NAVIGATING TO THE TOP OF THE BODY
+				jQuery('html, body').animate({ scrollTop: 0 }, 'slow');
+				
+				
+			},
+			afterPostSave: function(status){
+				
+				var self 			= this, 											// OBJECT ITSELF
+					title 			= self.model.get('title').rendered,					// POST TITLE
+					permalink 		= self.model.get('link'),							// POST LINK
+					dashboard_url 	= '',												// AUTHOR'S DASHBOARD URL
+					msg 			= '',												// MESSAGE TO BE DISPLAYED
+					addthis_url		= 'https://api.addthis.com/oexchange/0.8/forward';	// ADD THIS API URL
+			
+				
+				switch(status){
+					case 'publish':
+						
+						/* redirecting to the post that has been published
+							window.location = permalink + "?success=1";
+						*/
+						
+						var fb_link = `${addthis_url}/facebook/offer?url=${permalink}&pubid=ra-4def7e3f1fcc751a&ct=1&title=${title}&pco=tbxnj-1.0`;
+						
+						var tw_link = `${addthis_url}/twitter/offer?url=${permalink}&pubid=ra-4def7e3f1fcc751a&ct=1&title=${title}&pco=tbxnj-1.0`;
+						
+						msg = `Your post has been published <a href="${permalink}">here</a>
+							and can also be accessed on your <a href="">profile</a>. 
+							Meanwhile, go ahead and share it on <a target="_blank" href="${fb_link}">Facebook</a> 
+							or <a target="_blank" href="${tw_link}">Twitter</a>!`;
+							
+						break;
+					
+					default:
+						msg = 'Your post has been saved as a draft <a href="' + dashboard_url + '">here</a>. ' + 
+							'You can track all your drafts and published posts on <a href="'+dashboard_url+'">your profile</a>.';	
+				}
+				
+				// SHOW SUCCESS MESSAGE
+				self.displayMessage( msg, 'success' );
+				
+				
+			},
+			checkForSpam: function( title, content ){
+				
+				// IF THE SPAM WORDS HAVE NOT BEEN ADDED THEN RETURN
+				if( typeof pf_settings == 'undefined' ) return true;
+				
+				var flagWords 	= pf_settings['pf-spam'],
+					length 		= flagWords.length,
+					self 		= this;
+				
+				// CHANGING TO THE LOWER CASE AND REMOVE ALL WHITE SPACES FROM THE SENTENCE
+				title 	= title.toLowerCase().replace(/\s/g,'');
+				content = content.toLowerCase().replace(/\s/g,'');
+				
+				// ITERATE THROUGH EACH SPAM WORD
+				while( length-- ) {
+					
+					// CHECK IF THE WORD EXISTS IN THE TITLE OR POST CONTENT
+					if ( title.indexOf(flagWords[length].toLowerCase()) != -1 || content.indexOf(flagWords[length].toLowerCase()) != -1 ) {
+							
+						self.displayMessage("Your post has been marked as spam, if you disagree please contact <a href='/contact-us/'>Support</a> for further assistance or <a id='fep-continue-editing' href='#'>continue editing</a>.");
+			  
+						return false;
+						
+					}
+						
+				}
+				return true;
+			},
+			validate: function( title, content ){
+				var self 	= this;
+					
+				// CHECK IF THE TITLE AND CONTENT ARE EMPTY
+				if( !title || !content ){
+					
+					// SHOW ERROR MESSAGE
+					self.displayMessage( "You have missed one or more required fields. <br> <a id='fep-continue-editing' href='#'>Continue Editing</a>" );
+					
+					return false;
+				}
+				
+				return true;
+			}
+		});
+		
+		
+		
+		jQuery('[data-behaviour~=pf-form]').each(function(){
+			
+			var el = jQuery(this);
+			
+			new pf.form( { el: el, model: new wp.api.models.Post() } );
+		
+		});
+		
+	});
+	
+});
+
+

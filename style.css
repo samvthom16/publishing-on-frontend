@@ -1,0 +1,39 @@
+
+
+#pf-form #pf-title, #pf-form #featured-image, #pf-form .mce-tinymce{
+	margin-top: 30px;
+	margin-bottom: 30px;
+}
+
+#pf-form #pf-title, #pf-form .mce-tinymce{
+	border:#CCC solid 1px;
+}
+
+#pf-form #featured-image{
+	
+}
+
+#pf-form #list-buttons{
+	list-style: none;
+}
+
+#pf-form #list-buttons li{
+	display: inline-block;
+	margin-right: 10px;
+}
+
+#pf-featured-image{
+	background: none repeat scroll 0 0 #ececec;
+	border: 1px solid #e1e1e1;
+	display: table;
+	margin: 20px 0;
+	padding: 20px 20px 10px;
+	text-align: center;
+}
+#pf-featured-image-container{
+	width: 150px;
+	height: 150px;
+	background-position: center;
+	background-size: cover;
+	margin-bottom: 10px;
+}
