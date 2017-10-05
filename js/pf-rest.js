@@ -106,6 +106,11 @@ wp.api.loadPromise.done( function() {
 					data['content'] = { rendered: '' };
 				}
 				
+				// IF THE FEATURED MEDIA IS EMPTY
+				if( _.isUndefined( self.model.get('featured_media') ) ){
+					data['featured_media'] = 0;
+				}
+				
 				// RENDER THE POST MODEL INTO THE TEMPLATE FORM
 				self.$el.html( self.template( data ) );
 				
@@ -156,7 +161,7 @@ wp.api.loadPromise.done( function() {
 			},
 			formSubmit: function(ev){
 			
-				/* save the html to the content textarea */
+				/* SAVE THE TINYMCE HTML TO THE CONTENT TEXTAREA */
 				tinyMCE.triggerSave();
 				
 				/* INIT ALL VARIABLES : SELF OBJECT AND GET ALL FORM VALUES */

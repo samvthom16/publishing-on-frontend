@@ -64,7 +64,7 @@ class PF_REST{
 			// ENQUEUE SCRIPT
 			wp_enqueue_script('underscore');
 			wp_enqueue_script('backbone');
-			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '1.0.8', true);
+			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '1.0.9', true);
 			
 			// ENQUEUE MEDIA
 			wp_enqueue_media();
