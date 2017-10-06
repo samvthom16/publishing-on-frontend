@@ -16,6 +16,14 @@ class PF_REST{
 		
 		add_action('the_posts', array( $this, 'assets') );
 		
+		/*****Options Page Initialization*****/
+		add_action('admin_menu', function(){
+			add_options_page("Publish Frontend", "Publish Frontend", "edit_pages", "publish-frontend", array($this, 'admin_panel'));
+		});
+	}
+	
+	function admin_panel(){
+		include "templates/admin-panel.php";
 	}
 	
 	/* SUBMISSION FORM */
@@ -89,6 +97,8 @@ class PF_REST{
 	}
 	
 }
+
+
 
 
 	
