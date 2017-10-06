@@ -50,7 +50,7 @@ class PF_REST{
 		$found = false;
 		if ( !empty($posts) ){
 			foreach ($posts as $post) {
-				if ( $this->has_shortcode($post->post_content, 'fep_article_list') ||  $this->has_shortcode($post->post_content, 'pf_form') ){
+				if ( $this->has_shortcode($post->post_content, 'pf_article_list') ||  $this->has_shortcode($post->post_content, 'pf_form') ){
 					$found = true;
 					break;
 				}
