@@ -92,6 +92,17 @@ class PF_REST{
 		
 	}
 	
+	function update_option( $settings ){
+		
+		// UPDATE OPTION - PF SETTINGS
+		update_option('pf_settings', $settings);
+		
+	}
+	
+	function get_option(){
+		return get_option('pf_settings');
+	}
+	
 	function load_backbone_templates(){
 		include "templates/backbone_templates.php";
 	}
