@@ -244,6 +244,8 @@ wp.api.loadPromise.done( function() {
 			},
 			displayMessage: function( msg, message_box_class ){
 				
+				msg = this.stringFromTemplate( msg, { continueEditing : "<a id='pf-continue-editing' href='#'>Continue Editing</a>", });
+				
 				message_box_class = typeof message_box_class !== 'undefined' ? message_box_class : 'warning';
 				
 				// HIDE THE SUBMISSION FORM
@@ -256,7 +258,7 @@ wp.api.loadPromise.done( function() {
 				message_box.attr( 'class', message_box_class );
 				
 				// ADDING THE MSG TO THE DOM HTML
-				message_box.html(msg + "<br><a id='pf-continue-editing' href='#'>Continue Editing</a>");
+				message_box.html(msg);
 				
 				// DISPLAYING THE HIDDEN MESSAGE BOX
 				message_box.show();
@@ -337,8 +339,14 @@ wp.api.loadPromise.done( function() {
 				return true;
 			},
 			stringFromTemplate: function(template, variables) {
+				
+				if( ! template ) return template;
+				
 				return template.replace(new RegExp("\{([^\{]+)\}", "g"), function(_unused, varName){
-					return variables[varName];
+					if( variables[varName] ){
+						return variables[varName];
+					}
+					return _unused;
 				});
 			}
 		});

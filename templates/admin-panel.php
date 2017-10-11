@@ -14,7 +14,7 @@
 			'desc'	=> 'Message to be shown for spam alert.',
 		),
 		'spam_words' => array(
-			'label'	=> 'Spam Notification',
+			'label'	=> 'Spam Words',
 			'desc'	=> 'When the post contains any of these words in its content or title, it will be put in the trash. One word per line. It will match inside words, so “press” will match “WordPress”.',
 		)
 	);
