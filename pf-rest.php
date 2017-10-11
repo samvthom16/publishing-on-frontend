@@ -72,7 +72,7 @@ class PF_REST{
 			// ENQUEUE SCRIPT
 			wp_enqueue_script('underscore');
 			wp_enqueue_script('backbone');
-			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '2.0.9', true);
+			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '2.1.1', true);
 			
 			// ENQUEUE MEDIA
 			wp_enqueue_media();
@@ -92,7 +92,7 @@ class PF_REST{
 			));
 			
 			// ENQUEUE STYLES
-			wp_enqueue_style('pf-style', $uri.'style.css', false, '1.0.4' );
+			wp_enqueue_style('pf-style', $uri.'style.css', false, '1.0.5' );
 			
 			add_action('wp_footer', array( $this, 'load_backbone_templates') );
 			

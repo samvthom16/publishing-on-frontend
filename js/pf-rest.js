@@ -121,6 +121,10 @@ wp.api.loadPromise.done( function() {
 				// INITIALIZE TINYMCE
 				wp.editor.initialize('pf-content', { tinymce: true} );
 				
+				
+				
+				self.hideLoader();
+				
 			},
 			setFeaturedImage: function( url ){
 				

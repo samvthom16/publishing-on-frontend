@@ -1,4 +1,6 @@
-
+#pf-message{
+	display: none;
+}
 
 #pf-form #pf-title, #pf-form #featured-image, #pf-form .mce-tinymce{
 	margin-top: 30px;
