@@ -72,7 +72,7 @@ class PF_REST{
 			// ENQUEUE SCRIPT
 			wp_enqueue_script('underscore');
 			wp_enqueue_script('backbone');
-			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '2.0.8', true);
+			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '2.0.9', true);
 			
 			// ENQUEUE MEDIA
 			wp_enqueue_media();
@@ -83,11 +83,12 @@ class PF_REST{
 			$pf_settings = $this->get_option();
 			
 			wp_localize_script('pf-script', 'pf_settings', array(
-				'message' 		=>  str_replace("\r\n","<br>", stripslashes($pf_settings['message'])),
-				'message_spam' 	=>  str_replace("\r\n","<br>", stripslashes($pf_settings['message_spam'])),	
-				'message_draft' =>  str_replace("\r\n","<br>", stripslashes($pf_settings['message_draft'])),	
-				'message_empty' =>  str_replace("\r\n","<br>", stripslashes($pf_settings['message_empty'])),	
-				'spam_words'=> ($pf_settings['spam_words']) ? explode("\r\n", $pf_settings['spam_words']) : array()
+				'message' 			=>  str_replace("\r\n","<br>", stripslashes($pf_settings['message'])),
+				'message_spam' 		=>  str_replace("\r\n","<br>", stripslashes($pf_settings['message_spam'])),	
+				'message_draft' 	=>  str_replace("\r\n","<br>", stripslashes($pf_settings['message_draft'])),	
+				'message_empty' 	=>  str_replace("\r\n","<br>", stripslashes($pf_settings['message_empty'])),	
+				'spam_words'		=> ($pf_settings['spam_words']) ? explode("\r\n", $pf_settings['spam_words']) : array(),
+				'disable_moderation'=> ($pf_settings['disable_moderation']) ? 1 : 0
 			));
 			
 			// ENQUEUE STYLES
@@ -101,7 +102,46 @@ class PF_REST{
 		
 	}
 	
-	
+	function get_admin_form_fields(){
+		return array(
+			'message' => array(
+				'label'	=> 'Success Message',
+				'type'	=> 'text',
+				'desc'	=> 'Message that needs to be displayed after the post has been submitted. Use {permalink} in the message to use the permalink of the new post.',
+				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form <br>{permalink} - link of the new post that has been created. Usage: &lt;a href="{permalink}"&gt;New Post&lt;/a&gt;'
+			),
+			'message_draft' => array(
+				'label'	=> 'Draft Message',
+				'type'	=> 'text',
+				'desc'	=> 'Message that needs to be displayed after the post has been saved as draft.',
+				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form'
+			),
+			'message_spam' => array(
+				'label'	=> 'Spam Notification',
+				'type'	=> 'text',
+				'desc'	=> 'Message to be shown for spam alert.',
+				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form'
+			),
+			'message_empty' => array(
+				'label'	=> 'Empty Post Notification',
+				'type'	=> 'text',
+				'desc'	=> 'Message to be shown if an empty post has been submitted.',
+				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form'
+			),
+			'spam_words' => array(
+				'label'	=> 'Spam Words',
+				'type'	=> 'text',
+				'desc'	=> 'When the post contains any of these words in its content or title, the post will not be submitted. One word per line.',
+				'help'	=> 'It will match inside words, so "press" will match "WordPress".'
+			),
+			'disable_moderation' => array(
+				'label'	=> 'Disable Moderation',
+				'type'	=> 'checkbox',
+				'desc'	=> 'Anyone can publish directly',
+				'help'	=> ''
+			)
+		);
+	}
 	
 	function update_option( $settings ){
 		

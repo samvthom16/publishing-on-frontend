@@ -1,31 +1,6 @@
 <?php
 
-	$fields = array(
-		'message' => array(
-			'label'	=> 'Success Message',
-			'desc'	=> 'Message that needs to be displayed after the post has been submitted. Use {permalink} in the message to use the permalink of the new post.',
-			'help'	=> 'Variables can be used: <br>{continueEditing} - anchor link that will help the users get back to the submission form <br>{permalink} - link of the new post that has been created. Usage: &lt;a href="{permalink}"&gt;New Post&lt;/a&gt;'
-		),
-		'message_draft' => array(
-			'label'	=> 'Draft Message',
-			'desc'	=> 'Message that needs to be displayed after the post has been saved as draft.',
-			'help'	=> 'Variables can be used: <br>{continueEditing} - anchor link that will help the users get back to the submission form'
-		),
-		'message_spam' => array(
-			'label'	=> 'Spam Notification',
-			'desc'	=> 'Message to be shown for spam alert.',
-			'help'	=> 'Variables can be used: <br>{continueEditing} - anchor link that will help the users get back to the submission form'
-		),
-		'message_empty' => array(
-			'label'	=> 'Empty Post Notification',
-			'desc'	=> 'Message to be shown if an empty post has been submitted.',
-			'help'	=> 'Variables can be used: <br>{continueEditing} - anchor link that will help the users get back to the submission form'
-		),
-		'spam_words' => array(
-			'label'	=> 'Spam Words',
-			'desc'	=> 'When the post contains any of these words in its content or title, the post will not be submitted. One word per line. It will match inside words, so “press” will match “WordPress”.',
-		)
-	);
+	$fields = $this->get_admin_form_fields();
 	
 	if( isset( $_POST['submit'] ) ){
 		
@@ -40,15 +15,7 @@
 	}
 	
 	$pf_settings = $this->get_option();
-	
-	
-	
-	
-	
 ?>
-
-
-
 <div class="wrap">
 	<div id="icon-options-general" class="icon32"></div>
 	<h2><?php _e('Publishing on Frontend', 'publishing-on-frontend'); ?></h2>
@@ -62,9 +29,16 @@
 					<td>
 						<fieldset>
 							<legend class="screen-reader-text"><span><?php _e( $field['label'] );?></span></legend>
+							<?php if( $field['type'] == 'checkbox' ) :?>
+							<label for="<?php _e( $id );?>">
+								<input name="<?php _e( $id );?>" type="checkbox" id="<?php _e( $id );?>" value="1"  <?php if( $pf_settings[ $id ] ) _e("checked='checked'");?> />
+								<?php _e( $field['desc'] );?>
+							</label>
+							<?php else: ?>
 							<p><label for="<?php _e( $id );?>"><?php _e( $field['desc'] );?></label></p>
 							<p><textarea name="<?php _e( $id );?>" id="<?php _e( $id );?>" class="large-text code" rows="10" cols="50"><?php _e( $pf_settings[ $id ] );?></textarea></p>
 							<p class="help"><?php _e( $field['help'] );?></p>
+							<?php endif; ?>
 						</fieldset>
 					</td>
 				</tr>

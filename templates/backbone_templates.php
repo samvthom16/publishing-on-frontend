@@ -10,7 +10,7 @@
 		</div>
 		<ul id="list-buttons">
 			<li><button type="button" id="pf-submit-post" data-status="publish">Submit</button></li>
-			<li><button type="button" id="pf-draft-post" data-status="pending">Save Draft</button></li>
+			<li><button type="button" id="pf-draft-post" data-status="draft">Save Draft</button></li>
 			<li>or</li>
 			<li><a id="pf-cancel" href="" style="text-decoration: underline;">Cancel</a></li>
 			<li><i class="fa fa-refresh fa-spin"></i></li>

@@ -4,6 +4,8 @@ wp.api.loadPromise.done( function() {
 	// CALLBACK FUNCTION AFTER THE DOM HAS BEEN LOADED
 	jQuery('document').ready(function(){
 		
+		console.log( pf_settings );
+		
 		/* BASE VIEW THAT EXTENDS WP VIEW */
 		var BASE_VIEW = wp.Backbone.View.extend({
 				
@@ -158,6 +160,17 @@ wp.api.loadPromise.done( function() {
 				
 				
 			},
+			get_post_status: function( post_status ){
+				
+				if( post_status != 'draft' &&  "0" == pf_settings['disable_moderation'] ){
+					// CHANGE POST STATUS - 
+					post_status = 'pending';
+					
+				}
+				
+				return post_status;
+				
+			},
 			formSubmit: function(ev){
 			
 				/* SAVE THE TINYMCE HTML TO THE CONTENT TEXTAREA */
@@ -166,7 +179,7 @@ wp.api.loadPromise.done( function() {
 				/* INIT ALL VARIABLES : SELF OBJECT AND GET ALL FORM VALUES */
 				var self 	= this,				
 					title 	= this.$el.find('input[name=post_title]').val(),
-					status 	= jQuery(ev.currentTarget).data('status'),
+					status 	= this.get_post_status( jQuery(ev.currentTarget).data('status') ),
 					f_image	= this.$el.find('input[name=post_image]').val(),
 					today 	= new Date().toISOString(),
 					content = this.$el.find('textarea[name=post_content]').val();
@@ -273,26 +286,23 @@ wp.api.loadPromise.done( function() {
 				var self 			= this, 											// OBJECT ITSELF
 					title 			= self.model.get('title').rendered,					// POST TITLE
 					permalink 		= self.model.get('link'),							// POST LINK
-					dashboard_url 	= '',												// AUTHOR'S DASHBOARD URL
-					msg 			= '',												// MESSAGE TO BE DISPLAYED
-					addthis_url		= 'https://api.addthis.com/oexchange/0.8/forward';	// ADD THIS API URL
-			
-				
+					msg 			= '';												// MESSAGE TO BE DISPLAYED
+					
 				switch(status){
 					
-					case 'publish':
-						msg = pf_settings['message'];
+					case 'draft':
+						msg = pf_settings['message_draft'];
 						break;
 					
 					default:
-						msg = pf_settings['message_draft'];
+						msg = pf_settings['message'];
+						
 				}
 				
-				msg = this.stringFromTemplate( msg, { permalink : permalink, });
+				msg = this.stringFromTemplate( msg, { permalink : permalink, title : title});
 				
 				// SHOW SUCCESS MESSAGE
 				self.displayMessage( msg, 'success' );
-				
 				
 			},
 			checkForSpam: function( title, content ){
