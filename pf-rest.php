@@ -72,7 +72,7 @@ class PF_REST{
 			// ENQUEUE SCRIPT
 			wp_enqueue_script('underscore');
 			wp_enqueue_script('backbone');
-			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '2.0.7', true);
+			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '2.0.8', true);
 			
 			// ENQUEUE MEDIA
 			wp_enqueue_media();
@@ -86,6 +86,7 @@ class PF_REST{
 				'message' 		=>  str_replace("\r\n","<br>", stripslashes($pf_settings['message'])),
 				'message_spam' 	=>  str_replace("\r\n","<br>", stripslashes($pf_settings['message_spam'])),	
 				'message_draft' =>  str_replace("\r\n","<br>", stripslashes($pf_settings['message_draft'])),	
+				'message_empty' =>  str_replace("\r\n","<br>", stripslashes($pf_settings['message_empty'])),	
 				'spam_words'=> ($pf_settings['spam_words']) ? explode("\r\n", $pf_settings['spam_words']) : array()
 			));
 			

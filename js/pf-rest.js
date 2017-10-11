@@ -331,7 +331,7 @@ wp.api.loadPromise.done( function() {
 				if( !title || !content ){
 					
 					// SHOW ERROR MESSAGE
-					self.displayMessage( "You have missed one or more required fields. <br> <a id='fep-continue-editing' href='#'>Continue Editing</a>" );
+					self.displayMessage( pf_settings['message_empty'] );
 					
 					return false;
 				}
