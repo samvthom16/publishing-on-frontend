@@ -4,7 +4,6 @@ wp.api.loadPromise.done( function() {
 	// CALLBACK FUNCTION AFTER THE DOM HAS BEEN LOADED
 	jQuery('document').ready(function(){
 		
-		
 		/* BASE VIEW THAT EXTENDS WP VIEW */
 		var BASE_VIEW = wp.Backbone.View.extend({
 				
@@ -257,7 +256,7 @@ wp.api.loadPromise.done( function() {
 				message_box.attr( 'class', message_box_class );
 				
 				// ADDING THE MSG TO THE DOM HTML
-				message_box.html(msg);
+				message_box.html(msg + "<br><a id='pf-continue-editing' href='#'>Continue Editing</a>");
 				
 				// DISPLAYING THE HIDDEN MESSAGE BOX
 				message_box.show();
@@ -278,27 +277,16 @@ wp.api.loadPromise.done( function() {
 			
 				
 				switch(status){
+					
 					case 'publish':
-						
-						/* redirecting to the post that has been published
-							window.location = permalink + "?success=1";
-						*/
-						
-						var fb_link = `${addthis_url}/facebook/offer?url=${permalink}&pubid=ra-4def7e3f1fcc751a&ct=1&title=${title}&pco=tbxnj-1.0`;
-						
-						var tw_link = `${addthis_url}/twitter/offer?url=${permalink}&pubid=ra-4def7e3f1fcc751a&ct=1&title=${title}&pco=tbxnj-1.0`;
-						
-						msg = `Your post has been published <a href="${permalink}">here</a>
-							and can also be accessed on your <a href="">profile</a>. 
-							Meanwhile, go ahead and share it on <a target="_blank" href="${fb_link}">Facebook</a> 
-							or <a target="_blank" href="${tw_link}">Twitter</a>!`;
-							
+						msg = pf_settings['message'];
 						break;
 					
 					default:
-						msg = 'Your post has been saved as a draft <a href="' + dashboard_url + '">here</a>. ' + 
-							'You can track all your drafts and published posts on <a href="'+dashboard_url+'">your profile</a>.';	
+						msg = pf_settings['message_draft'];
 				}
+				
+				msg = this.stringFromTemplate( msg, { permalink : permalink, });
 				
 				// SHOW SUCCESS MESSAGE
 				self.displayMessage( msg, 'success' );
@@ -310,7 +298,8 @@ wp.api.loadPromise.done( function() {
 				// IF THE SPAM WORDS HAVE NOT BEEN ADDED THEN RETURN
 				if( typeof pf_settings == 'undefined' ) return true;
 				
-				var flagWords 	= pf_settings['pf-spam'],
+				var flagWords 	= pf_settings['spam_words'],
+					spamMsg		= pf_settings['message_spam'],
 					length 		= flagWords.length,
 					self 		= this;
 				
@@ -324,7 +313,7 @@ wp.api.loadPromise.done( function() {
 					// CHECK IF THE WORD EXISTS IN THE TITLE OR POST CONTENT
 					if ( title.indexOf(flagWords[length].toLowerCase()) != -1 || content.indexOf(flagWords[length].toLowerCase()) != -1 ) {
 							
-						self.displayMessage("Your post has been marked as spam, if you disagree please contact <a href='/contact-us/'>Support</a> for further assistance or <a id='fep-continue-editing' href='#'>continue editing</a>.");
+						self.displayMessage(spamMsg);
 			  
 						return false;
 						
@@ -346,6 +335,11 @@ wp.api.loadPromise.done( function() {
 				}
 				
 				return true;
+			},
+			stringFromTemplate: function(template, variables) {
+				return template.replace(new RegExp("\{([^\{]+)\}", "g"), function(_unused, varName){
+					return variables[varName];
+				});
 			}
 		});
 		

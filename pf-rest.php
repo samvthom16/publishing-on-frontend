@@ -72,13 +72,21 @@ class PF_REST{
 			// ENQUEUE SCRIPT
 			wp_enqueue_script('underscore');
 			wp_enqueue_script('backbone');
-			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '1.0.9', true);
+			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '2.0.4', true);
 			
 			// ENQUEUE MEDIA
 			wp_enqueue_media();
 				
 			// ENQUEUE THE EDITOR
 			wp_enqueue_editor();
+			
+			$pf_settings = $this->get_option();
+			
+			wp_localize_script('pf-script', 'pf_settings', array(
+				'message' 	=>  str_replace("\r\n","<br>", stripslashes($pf_settings['message'])),
+				'message_spam' 	=>  str_replace("\r\n","<br>", stripslashes($pf_settings['message_spam'])),	
+				'spam_words'=> ($pf_settings['spam_words']) ? explode("\r\n", $pf_settings['spam_words']) : array()
+			));
 			
 			// ENQUEUE STYLES
 			wp_enqueue_style('pf-style', $uri.'style.css', false, '1.0.4' );
@@ -87,10 +95,11 @@ class PF_REST{
 			
 		}
 		
-		
 		return $posts;
 		
 	}
+	
+	
 	
 	function update_option( $settings ){
 		
