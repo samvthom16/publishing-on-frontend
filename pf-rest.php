@@ -140,12 +140,30 @@ class PF_REST{
 				'desc'	=> 'Anyone can publish directly',
 				'help'	=> ''
 			),
+			'enable_drafts' => array(
+				'label'	=> 'Enable Drafts',
+				'type'	=> 'checkbox',
+				'desc'	=> 'Saving drafts before submitting the post',
+				'help'	=> ''
+			),
+			'enable_featured_image' => array(
+				'label'	=> 'Enable Featured Image',
+				'type'	=> 'checkbox',
+				'desc'	=> 'Enable uploading of featured image',
+				'help'	=> ''
+			),
 			'css' => array(
 				'label'		=> 'Styles to the form',
 				'type'		=> 'text',
 				'desc'		=> '',
 				'help'		=> '',
 				'default'	=> '#pf-message{}' 
+			),
+			'cancel_link' => array(
+				'label'		=> 'Cancel Link',
+				'type'		=> 'textfield',
+				'desc'		=> '',
+				'help'		=> '',
 			),
 		);
 	}

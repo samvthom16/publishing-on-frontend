@@ -29,16 +29,22 @@
 					<td>
 						<fieldset>
 							<legend class="screen-reader-text"><span><?php _e( $field['label'] );?></span></legend>
+							
 							<?php if( $field['type'] == 'checkbox' ) :?>
 							<label for="<?php _e( $id );?>">
 								<input name="<?php _e( $id );?>" type="checkbox" id="<?php _e( $id );?>" value="1"  <?php if( $pf_settings[ $id ] ) _e("checked='checked'");?> />
 								<?php _e( $field['desc'] );?>
 							</label>
+							
+							<?php elseif( $field['type'] == 'textfield' ) :?>
+							<input name="<?php _e( $id );?>" type="text" id="<?php _e( $id );?>" value="<?php _e( $pf_settings[ $id ] );?>" class="regular-text">
+							
 							<?php else: ?>
 							<p><label for="<?php _e( $id );?>"><?php _e( $field['desc'] );?></label></p>
 							<p><textarea name="<?php _e( $id );?>" id="<?php _e( $id );?>" class="large-text code" rows="10" cols="50"><?php _e( $pf_settings[ $id ] ? $pf_settings[ $id ] : $field['default'] );?></textarea></p>
 							<p class="help"><?php _e( $field['help'] );?></p>
 							<?php endif; ?>
+						
 						</fieldset>
 					</td>
 				</tr>
