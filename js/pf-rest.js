@@ -26,7 +26,7 @@ wp.api.loadPromise.done( function() {
 		pf.form = BASE_VIEW.extend({
 			hasSaved		: false,
 			template		: wp.template('pf-form'),
-			load_img  		: "i.fa.fa-refresh",
+			load_img  		: "#pf-loader",
 			submission_form : '#pf-form',
 			message_box 	: '#pf-message',
 			events :{

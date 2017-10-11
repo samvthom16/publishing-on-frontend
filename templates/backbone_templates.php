@@ -24,7 +24,7 @@
 			<li>or</li>
 			<li><a id="pf-cancel" href="<?php echo( $pf_settings['cancel_link'] );?>">Cancel</a></li>
 			<?php endif;?>
-			<li><i class="fa fa-refresh fa-spin"></i></li>
+			<li><div id="pf-loader"></div></li>
 		</ul>
 	</form>
 </script>
