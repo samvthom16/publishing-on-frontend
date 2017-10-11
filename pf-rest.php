@@ -116,18 +116,19 @@ class PF_REST{
 				'desc'	=> 'Message that needs to be displayed after the post has been saved as draft.',
 				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form'
 			),
-			'message_spam' => array(
-				'label'	=> 'Spam Notification',
-				'type'	=> 'text',
-				'desc'	=> 'Message to be shown for spam alert.',
-				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form'
-			),
 			'message_empty' => array(
 				'label'	=> 'Empty Post Notification',
 				'type'	=> 'text',
 				'desc'	=> 'Message to be shown if an empty post has been submitted.',
 				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form'
 			),
+			'message_spam' => array(
+				'label'	=> 'Spam Notification',
+				'type'	=> 'text',
+				'desc'	=> 'Message to be shown for spam alert.',
+				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form'
+			),
+			
 			'spam_words' => array(
 				'label'	=> 'Spam Words',
 				'type'	=> 'text',
