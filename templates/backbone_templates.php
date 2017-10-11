@@ -17,4 +17,4 @@
 		</ul>
 	</form>
 </script>
-
+<style><?php echo( $this->get_option()['css'] );?></style>

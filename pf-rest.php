@@ -128,7 +128,6 @@ class PF_REST{
 				'desc'	=> 'Message to be shown for spam alert.',
 				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form'
 			),
-			
 			'spam_words' => array(
 				'label'	=> 'Spam Words',
 				'type'	=> 'text',
@@ -140,7 +139,14 @@ class PF_REST{
 				'type'	=> 'checkbox',
 				'desc'	=> 'Anyone can publish directly',
 				'help'	=> ''
-			)
+			),
+			'css' => array(
+				'label'		=> 'Styles to the form',
+				'type'		=> 'text',
+				'desc'		=> '',
+				'help'		=> '',
+				'default'	=> '#pf-message{}' 
+			),
 		);
 	}
 	
