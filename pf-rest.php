@@ -72,7 +72,7 @@ class PF_REST{
 			// ENQUEUE SCRIPT
 			wp_enqueue_script('underscore');
 			wp_enqueue_script('backbone');
-			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '2.0.9', true);
+			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '2.1.2', true);
 			
 			// ENQUEUE MEDIA
 			wp_enqueue_media();
@@ -92,7 +92,7 @@ class PF_REST{
 			));
 			
 			// ENQUEUE STYLES
-			wp_enqueue_style('pf-style', $uri.'style.css', false, '1.0.4' );
+			wp_enqueue_style('pf-style', $uri.'style.css', false, '1.0.5' );
 			
 			add_action('wp_footer', array( $this, 'load_backbone_templates') );
 			
@@ -128,7 +128,6 @@ class PF_REST{
 				'desc'	=> 'Message to be shown for spam alert.',
 				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form'
 			),
-			
 			'spam_words' => array(
 				'label'	=> 'Spam Words',
 				'type'	=> 'text',
@@ -140,7 +139,32 @@ class PF_REST{
 				'type'	=> 'checkbox',
 				'desc'	=> 'Anyone can publish directly',
 				'help'	=> ''
-			)
+			),
+			'enable_drafts' => array(
+				'label'	=> 'Enable Drafts',
+				'type'	=> 'checkbox',
+				'desc'	=> 'Saving drafts before submitting the post',
+				'help'	=> ''
+			),
+			'enable_featured_image' => array(
+				'label'	=> 'Enable Featured Image',
+				'type'	=> 'checkbox',
+				'desc'	=> 'Enable uploading of featured image',
+				'help'	=> ''
+			),
+			'css' => array(
+				'label'		=> 'Styles to the form',
+				'type'		=> 'text',
+				'desc'		=> '',
+				'help'		=> '',
+				'default'	=> '#pf-message{}' 
+			),
+			'cancel_link' => array(
+				'label'		=> 'Cancel Link',
+				'type'		=> 'textfield',
+				'desc'		=> '',
+				'help'		=> '',
+			),
 		);
 	}
 	
