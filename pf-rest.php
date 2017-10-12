@@ -12,6 +12,8 @@ class PF_REST{
 	
 	function __construct(){
 		
+		register_deactivation_hook(__FILE__, function(){delete_option('pf_settings');});
+		
 		add_shortcode('pf_form', array( $this, 'form' ), 100);
 		
 		add_shortcode('pf_articles', array( $this, 'articles' ), 100);
@@ -157,34 +159,40 @@ class PF_REST{
 	function get_admin_form_fields(){
 		return array(
 			'message' => array(
-				'label'	=> 'Success Message',
-				'type'	=> 'text',
-				'desc'	=> 'Message that needs to be displayed after the post has been submitted. Use {permalink} in the message to use the permalink of the new post.',
-				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form <br>{permalink} - link of the new post that has been created. Usage: &lt;a href="{permalink}"&gt;New Post&lt;/a&gt;'
+				'label'		=> 'Success Message',
+				'type'		=> 'text',
+				'desc'		=> 'Message that needs to be displayed after the post has been submitted. Use {permalink} in the message to use the permalink of the new post.',
+				'help'		=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form <br>{permalink} - link of the new post that has been created. Usage: &lt;a href="{permalink}"&gt;New Post&lt;/a&gt;',
+				'default'	=> 'Your post has been submitted successfully! {continueEditing}'
+				
 			),
 			'message_draft' => array(
 				'label'	=> 'Draft Message',
 				'type'	=> 'text',
 				'desc'	=> 'Message that needs to be displayed after the post has been saved as draft.',
-				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form'
+				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form',
+				'default'	=> 'Your post has been saved successfully! {continueEditing}'
 			),
 			'message_empty' => array(
 				'label'	=> 'Empty Post Notification',
 				'type'	=> 'text',
 				'desc'	=> 'Message to be shown if an empty post has been submitted.',
-				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form'
+				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form',
+				'default'	=> 'Post title or content is missing! {continueEditing}'
 			),
 			'message_spam' => array(
 				'label'	=> 'Spam Notification',
 				'type'	=> 'text',
 				'desc'	=> 'Message to be shown for spam alert.',
-				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form'
+				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form',
+				'default'	=> 'Post title or content contains spam words! {continueEditing}'
 			),
 			'spam_words' => array(
 				'label'	=> 'Spam Words',
 				'type'	=> 'text',
 				'desc'	=> 'When the post contains any of these words in its content or title, the post will not be submitted. One word per line.',
-				'help'	=> 'It will match inside words, so "press" will match "WordPress".'
+				'help'	=> 'It will match inside words, so "press" will match "WordPress".',
+				'default'	=> ''
 			),
 			'disable_moderation' => array(
 				'label'	=> 'Disable Moderation',
@@ -211,12 +219,14 @@ class PF_REST{
 				'help'		=> 'CSS Variables:<br>Message Box: #pf-message<br>Form Buttons: #pf-cancel, #pf-submit-post, #pf-draft-post <br>
 							Form Fields: #pf-title, #pf-form .mce-tinymce <br>
 							Featured Image: #pf-featured-image, #pf-featured-image-container, #pf-featured-image-link <br>',
+				'default'	=> '#pf-message{}'
 			),
 			'message_guest' => array(
 				'label'		=> 'Non Logged Users',
 				'type'		=> 'text',
 				'desc'		=> 'Text for non-logged-in users',
 				'help'		=> 'By adding text, the default redirection to login page for non-logged-in users will stop.',
+				'default'	=> ''
 			),
 			'cancel_link' => array(
 				'label'		=> 'Cancel Link',
@@ -246,7 +256,7 @@ class PF_REST{
 
 
 
-register_deactivation_hook(__FILE__, function(){delete_option('pf_settings');});
+
 
 
 

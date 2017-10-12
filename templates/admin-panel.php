@@ -7,7 +7,13 @@
 		$pf_settings = array();
 		
 		foreach( $fields as $id => $field ){
-			$pf_settings[ $id ] = $_POST[ $id ];
+			
+			if( 'checkbox' == $field['type'] ){
+				$pf_settings[ $id ] = isset( $_POST[ $id ] ) ? 1 : 0;
+			}
+			else{
+				$pf_settings[ $id ] = isset( $_POST[ $id ] ) ? $_POST[ $id ] : '';
+			}
 		}
 		
 		$this->update_option( $pf_settings );
@@ -41,7 +47,7 @@
 							
 							<?php else: ?>
 							<p><label for="<?php _e( $id );?>"><?php _e( $field['desc'] );?></label></p>
-							<p><textarea name="<?php _e( $id );?>" id="<?php _e( $id );?>" class="large-text code" rows="10" cols="50"><?php _e( $pf_settings[ $id ] ? $pf_settings[ $id ] : isset($field['default']) ? $field['default'] : '' );?></textarea></p>
+							<p><textarea name="<?php _e( $id );?>" id="<?php _e( $id );?>" class="large-text code" rows="10" cols="50"><?php _e( $pf_settings[ $id ] ? $pf_settings[ $id ] : $field['default'] );?></textarea></p>
 							<p class="help"><?php _e( $field['help'] );?></p>
 							<?php endif; ?>
 						
