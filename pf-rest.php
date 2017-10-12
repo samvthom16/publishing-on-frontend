@@ -246,6 +246,11 @@ class PF_REST{
 
 
 
+register_deactivation_hook(__FILE__, function(){delete_option('pf_settings');});
+
+
+
+
 
 	
 $pf = new PF_REST;
