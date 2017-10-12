@@ -14,6 +14,8 @@ class PF_REST{
 		
 		add_shortcode('pf_form', array( $this, 'form' ), 100);
 		
+		add_shortcode('pf_articles', array( $this, 'articles' ), 100);
+		
 		add_action('the_posts', array( $this, 'assets') );
 		
 		/*****Options Page Initialization*****/
@@ -27,6 +29,36 @@ class PF_REST{
 	
 	function admin_panel(){
 		include "templates/admin-panel.php";
+	}
+	
+	function articles(){
+		
+		if ( !is_user_logged_in() ){
+			return '';
+		}
+		
+		ob_start();
+		
+		
+		if (isset($_GET['post_id']) && isset($_GET['pf_action']) && $_GET['pf_action'] == 'edit') {
+			include "templates/form.php";
+		}
+		else{
+			$query_atts = array(
+				'author' => 1,
+			);
+				
+			$the_query = new WP_Query( $query_atts );
+				
+			if($the_query->have_posts()){
+				include "templates/articles.php";
+				wp_reset_postdata();
+			}
+			
+		}
+		
+			
+		return ob_get_clean();
 	}
 	
 	/* SUBMISSION FORM */
@@ -78,7 +110,7 @@ class PF_REST{
 		$found = false;
 		if ( !empty($posts) ){
 			foreach ($posts as $post) {
-				if ( $this->has_shortcode($post->post_content, 'pf_article_list') ||  $this->has_shortcode($post->post_content, 'pf_form') ){
+				if ( $this->has_shortcode($post->post_content, 'pf_articles') ||  $this->has_shortcode($post->post_content, 'pf_form') ){
 					$found = true;
 					break;
 				}
@@ -92,7 +124,7 @@ class PF_REST{
 			// ENQUEUE SCRIPT
 			wp_enqueue_script('underscore');
 			wp_enqueue_script('backbone');
-			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '2.1.2', true);
+			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '2.1.3', true);
 			
 			// ENQUEUE MEDIA
 			wp_enqueue_media();

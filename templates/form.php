@@ -2,7 +2,7 @@
 
 	$post_id 	= 0;
 	
-	if( isset($_GET['post_id']) && isset($_GET['action']) && $_GET['action'] == 'edit' ){
+	if( isset($_GET['post_id']) && isset($_GET['pf_action']) && $_GET['pf_action'] == 'edit' ){
 		$post_id = $_GET['post_id'];
 	}
 ?>

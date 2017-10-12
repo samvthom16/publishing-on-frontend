@@ -369,9 +369,16 @@ wp.api.loadPromise.done( function() {
 		
 		jQuery('[data-behaviour~=pf-form]').each(function(){
 			
-			var el = jQuery(this);
+			var el 		= jQuery(this),
+				post_id = parseInt( el.attr('data-post') ),
+				post 	= new wp.api.models.Post();
 			
-			new pf.form( { el: el, model: new wp.api.models.Post() } );
+			if( post_id ){
+				post 	= new wp.api.models.Post({id: post_id});
+				post.fetch();
+			}
+			
+			new pf.form( { el: el, model: post } );
 		
 		});
 		
