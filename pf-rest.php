@@ -18,8 +18,11 @@ class PF_REST{
 		
 		/*****Options Page Initialization*****/
 		add_action('admin_menu', function(){
-			add_options_page("Publish Frontend", "Publish Frontend", "edit_pages", "publish-frontend", array($this, 'admin_panel'));
+			add_options_page("Publishing on Frontend", "Publishing on Frontend", "edit_pages", "publishing-on-frontend", array($this, 'admin_panel'));
 		});
+		
+		/** Starts output buffer so that auth_redirect() can work in shortcodes */
+		add_action('init', function(){ ob_start();});
 	}
 	
 	function admin_panel(){
@@ -28,20 +31,37 @@ class PF_REST{
 	
 	/* SUBMISSION FORM */
 	function form(){
-		ob_start();
+		
 		if ( !is_user_logged_in() ){
 			
-			echo "Not logged in.";
+			$pf_settings = $this->get_option();
+			
+			if( isset( $pf_settings['message_guest'] ) && $pf_settings['message_guest'] ){
+				return $pf_settings['message_guest'];
+			}
+			else{
+				
+				// REDIRECT TO LOGIN PAGE ONLY IF THE MESSAGE TO THE GUEST IS MISSING
+				
+				auth_redirect();
+			}
+			
+			
 			
 		}
 		else{
+			
+			ob_start();
+			
 			global $current_user;
 			
 			$current_user = wp_get_current_user();
 			
 			include "templates/form.php";
+			
+			return ob_get_clean();
 		}	
-		return ob_get_clean();
+		
 
 	}
 	
@@ -153,11 +173,18 @@ class PF_REST{
 				'help'	=> ''
 			),
 			'css' => array(
-				'label'		=> 'Styles to the form',
+				'label'		=> 'CSS Styles',
 				'type'		=> 'text',
-				'desc'		=> '',
-				'help'		=> '',
-				'default'	=> '#pf-message{}' 
+				'desc'		=> 'Apply styles to the form',
+				'help'		=> 'CSS Variables:<br>Message Box: #pf-message<br>Form Buttons: #pf-cancel, #pf-submit-post, #pf-draft-post <br>
+							Form Fields: #pf-title, #pf-form .mce-tinymce <br>
+							Featured Image: #pf-featured-image, #pf-featured-image-container, #pf-featured-image-link <br>',
+			),
+			'message_guest' => array(
+				'label'		=> 'Non Logged Users',
+				'type'		=> 'text',
+				'desc'		=> 'Text for non-logged-in users',
+				'help'		=> 'By adding text, the default redirection to login page for non-logged-in users will stop.',
 			),
 			'cancel_link' => array(
 				'label'		=> 'Cancel Link',
