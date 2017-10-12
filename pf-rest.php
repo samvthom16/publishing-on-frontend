@@ -8,6 +8,10 @@ Version: 1.0
 Author URI: http://sputznik.com/
 */
 
+
+defined('ABSPATH') or die('Permission Denied!!');
+
+
 class PF_REST{
 	
 	function __construct(){
