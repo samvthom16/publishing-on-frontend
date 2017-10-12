@@ -41,7 +41,7 @@
 							
 							<?php else: ?>
 							<p><label for="<?php _e( $id );?>"><?php _e( $field['desc'] );?></label></p>
-							<p><textarea name="<?php _e( $id );?>" id="<?php _e( $id );?>" class="large-text code" rows="10" cols="50"><?php _e( $pf_settings[ $id ] ? $pf_settings[ $id ] : $field['default'] );?></textarea></p>
+							<p><textarea name="<?php _e( $id );?>" id="<?php _e( $id );?>" class="large-text code" rows="10" cols="50"><?php _e( $pf_settings[ $id ] ? $pf_settings[ $id ] : isset($field['default']) ? $field['default'] : '' );?></textarea></p>
 							<p class="help"><?php _e( $field['help'] );?></p>
 							<?php endif; ?>
 						
