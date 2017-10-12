@@ -20,6 +20,9 @@ class PF_REST{
 		add_action('admin_menu', function(){
 			add_options_page("Publish Frontend", "Publish Frontend", "edit_pages", "publish-frontend", array($this, 'admin_panel'));
 		});
+		
+		/** Starts output buffer so that auth_redirect() can work in shortcodes */
+		add_action('init', function(){ ob_start();});
 	}
 	
 	function admin_panel(){
@@ -28,20 +31,25 @@ class PF_REST{
 	
 	/* SUBMISSION FORM */
 	function form(){
-		ob_start();
+		
 		if ( !is_user_logged_in() ){
 			
-			echo "Not logged in.";
+			auth_redirect();
 			
 		}
 		else{
+			
+			ob_start();
+			
 			global $current_user;
 			
 			$current_user = wp_get_current_user();
 			
 			include "templates/form.php";
+			
+			return ob_get_clean();
 		}	
-		return ob_get_clean();
+		
 
 	}
 	
