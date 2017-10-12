@@ -7,7 +7,13 @@
 		$pf_settings = array();
 		
 		foreach( $fields as $id => $field ){
-			$pf_settings[ $id ] = $_POST[ $id ];
+			
+			if( 'checkbox' == $field['type'] ){
+				$pf_settings[ $id ] = isset( $_POST[ $id ] ) ? 1 : 0;
+			}
+			else{
+				$pf_settings[ $id ] = isset( $_POST[ $id ] ) ? $_POST[ $id ] : '';
+			}
 		}
 		
 		$this->update_option( $pf_settings );
