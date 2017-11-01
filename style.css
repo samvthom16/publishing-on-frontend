@@ -52,3 +52,30 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.pf-navigation ul{
+	margin-top: 20px;
+	list-style: none;
+}
+
+.pf-navigation li{
+	border: #333 solid 1px;
+	display: inline-block;
+	padding: 5px 15px;
+	
+}
+.pf-navigation li.active{
+	background: #333;
+	
+}
+
+.pf-navigation a[href], .pf-navigation a[href]:hover{
+	text-decoration: none;	
+	box-shadow: none;	
+	border: none;	
+	color: #333;
+}
+
+.pf-navigation li.active a[href]{
+	color: #fff;
+}

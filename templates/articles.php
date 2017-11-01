@@ -10,3 +10,4 @@
 	</li>
 <?php endwhile;?>
 <ul>
+<?php $this->pagination( $the_query );?>
