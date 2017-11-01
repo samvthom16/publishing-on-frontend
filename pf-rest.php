@@ -142,7 +142,8 @@ class PF_REST{
 			else{
 				
 				$query_atts = array(
-					'author' 		=> 1,
+					'author' 		=>  get_the_author_meta( 'ID' ),
+					'post_status'	=> 'any',
 					'posts_per_page'=> 5,
 					'paged'			=> isset( $_GET[ 'pf_paged' ] ) ? $_GET[ 'pf_paged' ] : 1
 				);
