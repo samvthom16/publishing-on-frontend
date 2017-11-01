@@ -33,34 +33,57 @@ class PF_REST{
 		include "templates/admin-panel.php";
 	}
 	
+	function guest_message(){
+		$pf_settings = $this->get_option();
+			
+		if( isset( $pf_settings['message_guest'] ) && $pf_settings['message_guest'] ){
+			return $pf_settings['message_guest'];
+		}
+		
+		return false;
+	}
+	
 	function articles(){
 		
 		if ( !is_user_logged_in() ){
-			return '';
-		}
-		
-		ob_start();
-		
-		
-		if (isset($_GET['post_id']) && isset($_GET['pf_action']) && $_GET['pf_action'] == 'edit') {
-			include "templates/form.php";
+			$message = $this->guest_message();
+			
+			if( !$message ){
+				// REDIRECT TO LOGIN PAGE ONLY IF THE MESSAGE TO THE GUEST IS MISSING
+				auth_redirect();
+			}
+			else{
+				return $message;
+			}
 		}
 		else{
-			$query_atts = array(
-				'author' => 1,
-			);
-				
-			$the_query = new WP_Query( $query_atts );
-				
-			if($the_query->have_posts()){
-				include "templates/articles.php";
-				wp_reset_postdata();
+			
+			ob_start();
+		
+		
+			if (isset($_GET['post_id']) && isset($_GET['pf_action']) && $_GET['pf_action'] == 'edit') {
+				include "templates/form.php";
 			}
+			else{
+				$query_atts = array(
+					'author' => 1,
+				);
+					
+				$the_query = new WP_Query( $query_atts );
+					
+				if($the_query->have_posts()){
+					include "templates/articles.php";
+					wp_reset_postdata();
+				}
+				
+			}
+			
+				
+			return ob_get_clean();
 			
 		}
 		
-			
-		return ob_get_clean();
+		
 	}
 	
 	/* SUBMISSION FORM */
@@ -68,19 +91,15 @@ class PF_REST{
 		
 		if ( !is_user_logged_in() ){
 			
-			$pf_settings = $this->get_option();
+			$message = $this->guest_message();
 			
-			if( isset( $pf_settings['message_guest'] ) && $pf_settings['message_guest'] ){
-				return $pf_settings['message_guest'];
-			}
-			else{
-				
+			if( !$message ){
 				// REDIRECT TO LOGIN PAGE ONLY IF THE MESSAGE TO THE GUEST IS MISSING
-				
 				auth_redirect();
 			}
-			
-			
+			else{
+				return $message;
+			}
 			
 		}
 		else{
