@@ -1,0 +1,1 @@
+<a onclick="return confirm('Are you sure you want to delete?')" href="<?php the_pf_article_delete_link();?>">Delete</a>

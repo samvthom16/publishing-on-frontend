@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Publish on the Front End Using Rest API
-Plugin URI: http://wordpress.org/plugins/hello-dolly/
+Plugin URI: http://wordpress.org/plugins/publishing-on-frontend/
 Description: This is not just a plugin, it symbolizes the hope and enthusiasm of an entire generation summed up in two words sung most famously by Louis Armstrong: Hello, Dolly. When activated you will randomly see a lyric from <cite>Hello, Dolly</cite> in the upper right of your admin screen on every page.
 Author: Sputznik
 Version: 1.0
@@ -378,15 +378,20 @@ class PF_REST{
 		include "templates/backbone_templates.php";
 	}
 	
+	// CHECK IF THE TEMPLATE FILE EXISTS IN THE THEME
+	function include_template_file( $template_url ){
+		if( file_exists( get_stylesheet_directory()."/".$template_url ) ){
+			include( get_stylesheet_directory()."/".$template_url );
+		}
+		else{
+			include( $template_url );
+		}
+	}
+	
 }
 
-
-
-
-
-
-
-
-
-	
+global $pf;	
 $pf = new PF_REST;
+
+
+include("the.php");
