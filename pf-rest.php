@@ -149,7 +149,7 @@ class PF_REST{
 				include "templates/form.php";
 			}
 			else if (isset($_GET['post_id']) && isset($_GET['pf_action']) && $_GET['pf_action'] == 'delete') {
-				// DELETE ARTICLES
+				/* DELETE ARTICLES */
 				
 				// CHECK FOR PERMISSIONS
 				if (!current_user_can('delete_post', $_GET['post_id']))
