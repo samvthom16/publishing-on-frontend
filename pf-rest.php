@@ -37,34 +37,136 @@ class PF_REST{
 		include "templates/admin-panel.php";
 	}
 	
+	function guest_message(){
+		$pf_settings = $this->get_option();
+			
+		if( isset( $pf_settings['message_guest'] ) && $pf_settings['message_guest'] ){
+			return $pf_settings['message_guest'];
+		}
+		
+		return false;
+	}
+	
+	function get_pagenum_link( $page ){
+		
+		global $wp_query;
+		
+		return $wp_query->queried_object->guid."&pf_paged=".$page;
+		
+		
+	}
+	
+	function pagination( $wp_query ) {
+		
+		
+		
+		/** Stop execution if there's only 1 page */
+		if( $wp_query->max_num_pages <= 1 )
+			return;
+	 
+		$paged = isset( $_GET['pf_paged'] ) ? absint( $_GET['pf_paged'] ) : 1;
+		$max   = intval( $wp_query->max_num_pages );
+	 
+		/** Add current page to the array */
+		if ( $paged >= 1 )
+			$links[] = $paged;
+	 
+		/** Add the pages around the current page to the array */
+		if ( $paged >= 3 ) {
+			$links[] = $paged - 1;
+			$links[] = $paged - 2;
+		}
+	 
+		if ( ( $paged + 2 ) <= $max ) {
+			$links[] = $paged + 2;
+			$links[] = $paged + 1;
+		}
+	 
+		echo '<div class="pf-navigation"><ul>' . "\n";
+	 
+		/** Previous Post Link */
+		if ( get_previous_posts_link() )
+			printf( '<li>%s</li>' . "\n", get_previous_posts_link() );
+	 
+		/** Link to first page, plus ellipses if necessary */
+		if ( ! in_array( 1, $links ) ) {
+			$class = 1 == $paged ? ' class="active"' : '';
+	 
+			printf( '<li%s><a href="%s">%s</a></li>' . "\n", $class, esc_url( $this->get_pagenum_link( 1 ) ), '1' );
+	 
+			if ( ! in_array( 2, $links ) )
+				echo '<li>…</li>';
+		}
+	 
+		/** Link to current page, plus 2 pages in either direction if necessary */
+		sort( $links );
+		foreach ( (array) $links as $link ) {
+			$class = $paged == $link ? ' class="active"' : '';
+			printf( '<li%s><a href="%s">%s</a></li>' . "\n", $class, esc_url( $this->get_pagenum_link( $link ) ), $link );
+		}
+	 
+		/** Link to last page, plus ellipses if necessary */
+		if ( ! in_array( $max, $links ) ) {
+			if ( ! in_array( $max - 1, $links ) )
+				echo '<li>…</li>' . "\n";
+	 
+			$class = $paged == $max ? ' class="active"' : '';
+			printf( '<li%s><a href="%s">%s</a></li>' . "\n", $class, esc_url( $this->get_pagenum_link( $max ) ), $max );
+		}
+	 
+		/** Next Post Link */
+		if ( get_next_posts_link() )
+			printf( '<li>%s</li>' . "\n", get_next_posts_link() );
+	 
+		echo '</ul></div>' . "\n";
+	 
+	}
+	
 	function articles(){
 		
 		if ( !is_user_logged_in() ){
-			return '';
-		}
-		
-		ob_start();
-		
-		
-		if (isset($_GET['post_id']) && isset($_GET['pf_action']) && $_GET['pf_action'] == 'edit') {
-			include "templates/form.php";
+			$message = $this->guest_message();
+			
+			if( !$message ){
+				// REDIRECT TO LOGIN PAGE ONLY IF THE MESSAGE TO THE GUEST IS MISSING
+				auth_redirect();
+			}
+			else{
+				return $message;
+			}
 		}
 		else{
-			$query_atts = array(
-				'author' => 1,
-			);
-				
-			$the_query = new WP_Query( $query_atts );
-				
-			if($the_query->have_posts()){
-				include "templates/articles.php";
-				wp_reset_postdata();
+			
+			ob_start();
+		
+		
+			if (isset($_GET['post_id']) && isset($_GET['pf_action']) && $_GET['pf_action'] == 'edit') {
+				include "templates/form.php";
 			}
+			else{
+				
+				$query_atts = array(
+					'author' 		=>  get_the_author_meta( 'ID' ),
+					'post_status'	=> 'any',
+					'posts_per_page'=> 5,
+					'paged'			=> isset( $_GET[ 'pf_paged' ] ) ? $_GET[ 'pf_paged' ] : 1
+				);
+					
+				$the_query = new WP_Query( $query_atts );
+					
+				if($the_query->have_posts()){
+					include "templates/articles.php";
+					wp_reset_postdata();
+				}
+				
+			}
+			
+				
+			return ob_get_clean();
 			
 		}
 		
-			
-		return ob_get_clean();
+		
 	}
 	
 	/* SUBMISSION FORM */
@@ -72,19 +174,15 @@ class PF_REST{
 		
 		if ( !is_user_logged_in() ){
 			
-			$pf_settings = $this->get_option();
+			$message = $this->guest_message();
 			
-			if( isset( $pf_settings['message_guest'] ) && $pf_settings['message_guest'] ){
-				return $pf_settings['message_guest'];
-			}
-			else{
-				
+			if( !$message ){
 				// REDIRECT TO LOGIN PAGE ONLY IF THE MESSAGE TO THE GUEST IS MISSING
-				
 				auth_redirect();
 			}
-			
-			
+			else{
+				return $message;
+			}
 			
 		}
 		else{
@@ -150,7 +248,7 @@ class PF_REST{
 			));
 			
 			// ENQUEUE STYLES
-			wp_enqueue_style('pf-style', $uri.'style.css', false, '1.0.5' );
+			wp_enqueue_style('pf-style', $uri.'style.css', false, '1.0.6' );
 			
 			add_action('wp_footer', array( $this, 'load_backbone_templates') );
 			
