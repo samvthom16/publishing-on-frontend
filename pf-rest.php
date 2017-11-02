@@ -43,11 +43,18 @@ class PF_REST{
 		return false;
 	}
 	
+	// PERMALINK OF THE PAGE THAT HAS THE SHORTCODE
+	function get_current_page_permalink(){
+		global $wp_query;
+		return $wp_query->queried_object->guid;
+	}
+	
+	// PAGINATION LINK OF THE ARTICLES DISPLAYED THROUGH THE LIST SHORTCODE
 	function get_pagenum_link( $page ){
 		
 		global $wp_query;
 		
-		return $wp_query->queried_object->guid."&pf_paged=".$page;
+		return $this->get_current_page_permalink()."&pf_paged=".$page;
 		
 		
 	}
@@ -118,6 +125,7 @@ class PF_REST{
 	 
 	}
 	
+	// LIST OF AUTHOR POSTS
 	function articles(){
 		
 		if ( !is_user_logged_in() ){
@@ -135,22 +143,40 @@ class PF_REST{
 			
 			ob_start();
 		
-		
+			
 			if (isset($_GET['post_id']) && isset($_GET['pf_action']) && $_GET['pf_action'] == 'edit') {
+				/* EDIT FORM FOR ARTICLE */
 				include "templates/form.php";
+			}
+			else if (isset($_GET['post_id']) && isset($_GET['pf_action']) && $_GET['pf_action'] == 'delete') {
+				// DELETE ARTICLES
+				
+				// CHECK FOR PERMISSIONS
+				if (!current_user_can('delete_post', $_GET['post_id']))
+					throw new Exception(__("You don't have permission to delete this post", 'publishing-on-frontend'), 1);
+
+				$result = wp_delete_post($_GET['post_id'], true);
+				
+				// CHECK IF ARTICLE HAS BEEN DELETED
+				if (!$result)
+					throw new Exception(__("The article could not be deleted", 'publishing-on-frontend'), 1);
+
+				wp_redirect($this->get_current_page_permalink());
 			}
 			else{
 				
+				// LIST OF ARTICLES FOR THE CURRENT AUTHOR
+				
 				$query_atts = array(
-					'author' 		=>  get_the_author_meta( 'ID' ),
-					'post_status'	=> 'any',
-					'posts_per_page'=> 5,
+					'author' 		=>  get_the_author_meta( 'ID' ), // CURRENT AUTHOR
+					'post_status'	=> 'any',						 // GET POSTS OF ALL STATUS
+					'posts_per_page'=> 5,							
 					'paged'			=> isset( $_GET[ 'pf_paged' ] ) ? $_GET[ 'pf_paged' ] : 1
 				);
 					
 				$the_query = new WP_Query( $query_atts );
 					
-				if($the_query->have_posts()){
+				if( $the_query->have_posts() ){
 					include "templates/articles.php";
 					wp_reset_postdata();
 				}
@@ -182,6 +208,8 @@ class PF_REST{
 			
 		}
 		else{
+			
+			// DISPLAY THE TEMPLATE FOR SUBMISSION FORM
 			
 			ob_start();
 			
