@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Publish on the Front End Using Rest API
-Plugin URI: http://wordpress.org/plugins/hello-dolly/
+Plugin URI: http://wordpress.org/plugins/publishing-on-frontend/
 Description: This is not just a plugin, it symbolizes the hope and enthusiasm of an entire generation summed up in two words sung most famously by Louis Armstrong: Hello, Dolly. When activated you will randomly see a lyric from <cite>Hello, Dolly</cite> in the upper right of your admin screen on every page.
 Author: Sputznik
 Version: 1.0
@@ -14,29 +14,36 @@ defined('ABSPATH') or die('Permission Denied!!');
 
 class PF_REST{
 	
+	var $admin;
+	var $option_name;
+	
+	/** CLASS CONSTRUCTOR */
 	function __construct(){
 		
-		register_deactivation_hook(__FILE__, function(){delete_option('pf_settings');});
+		$this->option_name = 'pf_settings';
 		
-		add_shortcode('pf_form', array( $this, 'form' ), 100);
+		/** INITIALIZE ADMIN PANEL SETTINGS */
+		include("pf-admin.php");
+		$admin = new PF_ADMIN( $option_name );
 		
-		add_shortcode('pf_articles', array( $this, 'articles' ), 100);
-		
-		add_action('the_posts', array( $this, 'assets') );
-		
-		/*****Options Page Initialization*****/
-		add_action('admin_menu', function(){
-			add_options_page("Publishing on Frontend", "Publishing on Frontend", "edit_pages", "publishing-on-frontend", array($this, 'admin_panel'));
+		register_deactivation_hook(__FILE__, function(){
+			delete_option( $this->option_name );
 		});
 		
-		/** Starts output buffer so that auth_redirect() can work in shortcodes */
+		/** REGISTER SHORTCODES */
+		add_shortcode('pf_form', array( $this, 'form' ), 100);
+		add_shortcode('pf_articles', array( $this, 'articles' ), 100);
+		/** END OF REGISTRATION */
+		
+		/** TO LOAD THE ASSETS - SCRIPTS AND STYLES */
+		add_action('the_posts', array( $this, 'assets') );
+		
+		/** STARTS OUTPUT BUFFER FOR auth_redirect() TO WORK IN SHORTCODES */
 		add_action('init', function(){ ob_start();});
 	}
 	
-	function admin_panel(){
-		include "templates/admin-panel.php";
-	}
 	
+	/** MESSAGE FOR GUESTS/NON LOGGED-IN USERS ON PAGES WITH SHORTCODES */
 	function guest_message(){
 		$pf_settings = $this->get_option();
 			
@@ -47,10 +54,14 @@ class PF_REST{
 		return false;
 	}
 	
-	// PERMALINK OF THE PAGE THAT HAS THE SHORTCODE
+	/** PERMALINK OF THE PAGE THAT IS USING THE SHORTCODE */
 	function get_current_page_permalink(){
 		global $wp_query;
-		return $wp_query->queried_object->guid;
+		
+		if( $wp_query )
+			return $wp_query->queried_object->guid;
+		
+		return '';
 	}
 	
 	// PAGINATION LINK OF THE ARTICLES DISPLAYED THROUGH THE LIST SHORTCODE
@@ -65,25 +76,25 @@ class PF_REST{
 	
 	function pagination( $wp_query ) {
 		
-		
-		
-		/** Stop execution if there's only 1 page */
+		/** STOP EXECUTION IF THERE IS ONLY 1 PAGE */
 		if( $wp_query->max_num_pages <= 1 )
 			return;
-	 
+		
+		/** GET QUERY PARAMETERS */
 		$paged = isset( $_GET['pf_paged'] ) ? absint( $_GET['pf_paged'] ) : 1;
 		$max   = intval( $wp_query->max_num_pages );
 	 
-		/** Add current page to the array */
+		/** ADD CURRENT PAGE TO THE ARRAY */
 		if ( $paged >= 1 )
 			$links[] = $paged;
 	 
-		/** Add the pages around the current page to the array */
+		/** ADD THE PAGES AROUND THE CURRENT PAGE TO THE ARRAY */
 		if ( $paged >= 3 ) {
 			$links[] = $paged - 1;
 			$links[] = $paged - 2;
 		}
-	 
+		
+		/* FOR THE LAST TWO PAGE LINKS */
 		if ( ( $paged + 2 ) <= $max ) {
 			$links[] = $paged + 2;
 			$links[] = $paged + 1;
@@ -129,7 +140,7 @@ class PF_REST{
 	 
 	}
 	
-	// LIST OF AUTHOR POSTS
+	/** LIST OF AUTHOR POSTS */
 	function articles(){
 		
 		if ( !is_user_logged_in() ){
@@ -148,28 +159,29 @@ class PF_REST{
 			ob_start();
 		
 			
-			if (isset($_GET['post_id']) && isset($_GET['pf_action']) && $_GET['pf_action'] == 'edit') {
-				/* EDIT FORM FOR ARTICLE */
+			if (isset($_GET['post_id']) && isset($_GET['pf_action']) && $_GET['pf_action'] == 'edit') { /* EDIT FORM FOR ARTICLE */
+				
 				include "templates/form.php";
 			}
-			else if (isset($_GET['post_id']) && isset($_GET['pf_action']) && $_GET['pf_action'] == 'delete') {
-				/* DELETE ARTICLES */
+			else if (isset($_GET['post_id']) && isset($_GET['pf_action']) && $_GET['pf_action'] == 'delete') { /* DELETE ARTICLES */
 				
-				// CHECK FOR PERMISSIONS
+				/** CHECK FOR PERMISSIONS */
 				if (!current_user_can('delete_post', $_GET['post_id']))
 					throw new Exception(__("You don't have permission to delete this post", 'publishing-on-frontend'), 1);
 
+				/** DELETE POST */
 				$result = wp_delete_post($_GET['post_id'], true);
 				
-				// CHECK IF ARTICLE HAS BEEN DELETED
+				/** CHECK IF ARTICLE HAS BEEN DELETED */
 				if (!$result)
 					throw new Exception(__("The article could not be deleted", 'publishing-on-frontend'), 1);
-
+				
+				/** REDIRECT TO THE CURRENT PAGE, IF ALL GOES WELL */
 				wp_redirect($this->get_current_page_permalink());
 			}
 			else{
 				
-				// LIST OF ARTICLES FOR THE CURRENT AUTHOR
+				/** LIST OF ARTICLES FOR THE CURRENT AUTHOR */
 				
 				$query_atts = array(
 					'author' 		=>  get_the_author_meta( 'ID' ), // CURRENT AUTHOR
@@ -195,7 +207,7 @@ class PF_REST{
 		
 	}
 	
-	/* SUBMISSION FORM */
+	/** SHORTCODE TO THE SUBMISSION FORM */
 	function form(){
 		
 		if ( !is_user_logged_in() ){
@@ -213,7 +225,7 @@ class PF_REST{
 		}
 		else{
 			
-			// DISPLAY THE TEMPLATE FOR SUBMISSION FORM
+			/** DISPLAY THE TEMPLATE FOR THE SUBMISSION FORM */
 			
 			ob_start();
 			
@@ -229,14 +241,14 @@ class PF_REST{
 
 	}
 	
-	/* CHECK IF THE CONTENT HAS THE SHORTCODE */
+	/** CHECK IF THE CONTENT HAS THE SHORTCODE */
 	function has_shortcode( $content, $tag ) {
 		if(stripos($content, '['.$tag.']') !== false)
 			return true;
 		return false;
 	}
 	
-	/* LOAD SCRIPTS AND STYLES IF THE SHORTCODE IS USED */
+	/** LOAD SCRIPTS AND STYLES IF THE SHORTCODE IS USED */
 	function assets($posts){
 		
 		$found = false;
@@ -253,15 +265,15 @@ class PF_REST{
 			
 			$uri = plugin_dir_url( __FILE__ );
 			
-			// ENQUEUE SCRIPT
+			/** ENQUEUE SCRIPTS */
 			wp_enqueue_script('underscore');
 			wp_enqueue_script('backbone');
 			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '2.1.3', true);
 			
-			// ENQUEUE MEDIA
+			/** ENQUEUE MEDIA */
 			wp_enqueue_media();
 				
-			// ENQUEUE THE EDITOR
+			/** ENQUEUE THE EDITOR */
 			wp_enqueue_editor();
 			
 			$pf_settings = $this->get_option();
@@ -275,7 +287,7 @@ class PF_REST{
 				'disable_moderation'=> ($pf_settings['disable_moderation']) ? 1 : 0
 			));
 			
-			// ENQUEUE STYLES
+			/** ENQUEUE STYLES */
 			wp_enqueue_style('pf-style', $uri.'style.css', false, '1.0.6' );
 			
 			add_action('wp_footer', array( $this, 'load_backbone_templates') );
@@ -286,111 +298,29 @@ class PF_REST{
 		
 	}
 	
-	function get_admin_form_fields(){
-		return array(
-			'message' => array(
-				'label'		=> 'Success Message',
-				'type'		=> 'text',
-				'desc'		=> 'Message that needs to be displayed after the post has been submitted. Use {permalink} in the message to use the permalink of the new post.',
-				'help'		=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form <br>{permalink} - link of the new post that has been created. Usage: &lt;a href="{permalink}"&gt;New Post&lt;/a&gt;',
-				'default'	=> 'Your post has been submitted successfully! {continueEditing}'
-				
-			),
-			'message_draft' => array(
-				'label'	=> 'Draft Message',
-				'type'	=> 'text',
-				'desc'	=> 'Message that needs to be displayed after the post has been saved as draft.',
-				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form',
-				'default'	=> 'Your post has been saved successfully! {continueEditing}'
-			),
-			'message_empty' => array(
-				'label'	=> 'Empty Post Notification',
-				'type'	=> 'text',
-				'desc'	=> 'Message to be shown if an empty post has been submitted.',
-				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form',
-				'default'	=> 'Post title or content is missing! {continueEditing}'
-			),
-			'message_spam' => array(
-				'label'	=> 'Spam Notification',
-				'type'	=> 'text',
-				'desc'	=> 'Message to be shown for spam alert.',
-				'help'	=> 'Variables can be used: <br>{continueEditing} - button that will help the users get back to the submission form',
-				'default'	=> 'Post title or content contains spam words! {continueEditing}'
-			),
-			'spam_words' => array(
-				'label'	=> 'Spam Words',
-				'type'	=> 'text',
-				'desc'	=> 'When the post contains any of these words in its content or title, the post will not be submitted. One word per line.',
-				'help'	=> 'It will match inside words, so "press" will match "WordPress".',
-				'default'	=> ''
-			),
-			'disable_moderation' => array(
-				'label'	=> 'Disable Moderation',
-				'type'	=> 'checkbox',
-				'desc'	=> 'Anyone can publish directly',
-				'help'	=> ''
-			),
-			'enable_drafts' => array(
-				'label'	=> 'Enable Drafts',
-				'type'	=> 'checkbox',
-				'desc'	=> 'Saving drafts before submitting the post',
-				'help'	=> ''
-			),
-			'enable_featured_image' => array(
-				'label'	=> 'Enable Featured Image',
-				'type'	=> 'checkbox',
-				'desc'	=> 'Enable uploading of featured image',
-				'help'	=> ''
-			),
-			'css' => array(
-				'label'		=> 'CSS Styles',
-				'type'		=> 'text',
-				'desc'		=> 'Apply styles to the form',
-				'help'		=> 'CSS Variables:<br>Message Box: #pf-message<br>Form Buttons: #pf-cancel, #pf-submit-post, #pf-draft-post <br>
-							Form Fields: #pf-title, #pf-form .mce-tinymce <br>
-							Featured Image: #pf-featured-image, #pf-featured-image-container, #pf-featured-image-link <br>',
-				'default'	=> '#pf-message{}'
-			),
-			'message_guest' => array(
-				'label'		=> 'Non Logged Users',
-				'type'		=> 'text',
-				'desc'		=> 'Text for non-logged-in users',
-				'help'		=> 'By adding text, the default redirection to login page for non-logged-in users will stop.',
-				'default'	=> ''
-			),
-			'cancel_link' => array(
-				'label'		=> 'Cancel Link',
-				'type'		=> 'textfield',
-				'desc'		=> '',
-				'help'		=> '',
-			),
-		);
-	}
-	
-	function update_option( $settings ){
-		
-		// UPDATE OPTION - PF SETTINGS
-		update_option('pf_settings', $settings);
-		
-	}
-	
 	function get_option(){
-		return get_option('pf_settings');
+		return get_option($this->option_name);
 	}
+	
 	
 	function load_backbone_templates(){
 		include "templates/backbone_templates.php";
 	}
 	
+	// CHECK IF THE TEMPLATE FILE EXISTS IN THE THEME
+	function include_template_file( $template_url ){
+		if( file_exists( get_stylesheet_directory()."/".$template_url ) ){
+			include( get_stylesheet_directory()."/".$template_url );
+		}
+		else{
+			include( $template_url );
+		}
+	}
+	
 }
 
-
-
-
-
-
-
-
-
-	
+global $pf;	
 $pf = new PF_REST;
+
+
+include("the.php");

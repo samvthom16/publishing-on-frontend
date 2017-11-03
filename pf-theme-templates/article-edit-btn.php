@@ -1,0 +1,1 @@
+<a href="<?php the_pf_article_edit_link();?>">Edit</a>
