@@ -24,7 +24,7 @@ class PF_REST{
 		
 		/** INITIALIZE ADMIN PANEL SETTINGS */
 		include("pf-admin.php");
-		$admin = new PF_ADMIN( $option_name );
+		$admin = new PF_ADMIN( $this->option_name );
 		
 		register_deactivation_hook(__FILE__, function(){
 			delete_option( $this->option_name );
