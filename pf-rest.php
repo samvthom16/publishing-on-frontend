@@ -24,8 +24,14 @@ class PF_REST{
 		
 		/** INITIALIZE ADMIN PANEL SETTINGS */
 		include("pf-admin.php");
-		$admin = new PF_ADMIN( $this->option_name );
+		$this->admin = new PF_ADMIN( $this->option_name );
 		
+		/* SET DEFAULT SETTINGS ONCE ACTIVATED */
+		register_activation_hook(__FILE__, function(){
+			$this->admin->set_default_settings();
+		});
+		
+		/* DELETE CUSTOMIZE OPTIONS IF THE PLUGIN HAS BEEN DEACTIVATED */
 		register_deactivation_hook(__FILE__, function(){
 			delete_option( $this->option_name );
 		});
