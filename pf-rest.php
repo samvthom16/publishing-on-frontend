@@ -2,7 +2,7 @@
 /*
 Plugin Name: Publish on the Front End Using Rest API
 Plugin URI: http://wordpress.org/plugins/publishing-on-frontend/
-Description: This is not just a plugin, it symbolizes the hope and enthusiasm of an entire generation summed up in two words sung most famously by Louis Armstrong: Hello, Dolly. When activated you will randomly see a lyric from <cite>Hello, Dolly</cite> in the upper right of your admin screen on every page.
+Description: Publishing on front end using WP REST API. Using the WP Backbone API and REST API. 
 Author: Sputznik
 Version: 1.0
 Author URI: http://sputznik.com/
@@ -24,8 +24,14 @@ class PF_REST{
 		
 		/** INITIALIZE ADMIN PANEL SETTINGS */
 		include("pf-admin.php");
-		$admin = new PF_ADMIN( $this->option_name );
+		$this->admin = new PF_ADMIN( $this->option_name );
 		
+		/* SET DEFAULT SETTINGS ONCE ACTIVATED */
+		register_activation_hook(__FILE__, function(){
+			$this->admin->set_default_settings();
+		});
+		
+		/* DELETE CUSTOMIZE OPTIONS IF THE PLUGIN HAS BEEN DEACTIVATED */
 		register_deactivation_hook(__FILE__, function(){
 			delete_option( $this->option_name );
 		});

@@ -8,12 +8,32 @@ class PF_ADMIN{
 		
 		$this->option_name = $option_name;
 		
+		
+		
 		/*****Options Page Initialization*****/
 		add_action('admin_menu', function(){
 			add_options_page("Publishing on Frontend", "Publishing on Frontend", "edit_pages", "publishing-on-frontend", array($this, 'admin_panel'));
 		});
 		
 		
+	}
+	
+	function set_default_settings(){
+		
+		$default_settings = array();
+		$fields = $this->get_admin_form_fields();
+		
+		foreach( $fields as $id => $field ){
+			
+			if( 'checkbox' == $field['type'] ){
+				$default_settings[ $id ] = 0;
+			}
+			else{
+				$default_settings[ $id ] = isset( $field['default'] ) ? $field['default'] : '';
+			}
+		}
+		
+		$this->update_option( $default_settings );
 	}
 	
 	function admin_panel(){
