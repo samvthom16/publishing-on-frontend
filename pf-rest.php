@@ -274,7 +274,7 @@ class PF_REST{
 			/** ENQUEUE SCRIPTS */
 			wp_enqueue_script('underscore');
 			wp_enqueue_script('backbone');
-			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '2.1.3', true);
+			wp_enqueue_script('pf-script', $uri.'js/pf-rest.js', array('wp-backbone', 'wp-api'), '2.1.5', true);
 			
 			/** ENQUEUE MEDIA */
 			wp_enqueue_media();
