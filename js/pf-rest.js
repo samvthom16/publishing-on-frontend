@@ -4,7 +4,7 @@ wp.api.loadPromise.done( function() {
 	// CALLBACK FUNCTION AFTER THE DOM HAS BEEN LOADED
 	jQuery('document').ready(function(){
 		
-		console.log( pf_settings );
+		/*console.log( pf_settings );*/
 		
 		/* BASE VIEW THAT EXTENDS WP VIEW */
 		var BASE_VIEW = wp.Backbone.View.extend({
@@ -33,7 +33,8 @@ wp.api.loadPromise.done( function() {
 				'click #pf-submit-post'			: 'formSubmit',
 				'click #pf-draft-post'			: 'formSubmit',
 				'click #pf-featured-image-link'	: 'selectFeaturedImage',
-				'click #pf-continue-editing'	: 'continueEditing'
+				'click #pf-continue-editing'	: 'continueEditing',
+				'keydown #pf-form'				: 'preventSubmitOnEnter'
 			},
 			initialize: function(){
 				
@@ -219,6 +220,12 @@ wp.api.loadPromise.done( function() {
 						
 					}
 				});
+			},
+			preventSubmitOnEnter: function(event){
+			    if(event.keyCode == 13) {
+			      event.preventDefault();
+			      return false;
+			    }
 			},
 			hideLoader: function(){
 				/* HIDING THE LOADER */
