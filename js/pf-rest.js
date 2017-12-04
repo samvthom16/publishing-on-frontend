@@ -34,7 +34,7 @@ wp.api.loadPromise.done( function() {
 				'click #pf-draft-post'			: 'formSubmit',
 				'click #pf-featured-image-link'	: 'selectFeaturedImage',
 				'click #pf-continue-editing'	: 'continueEditing',
-				'keydown #pf-form'				: 'preventSubmitOnEnter'
+				'keydown #pf-title'				: 'preventSubmitOnEnter'
 			},
 			initialize: function(){
 				
